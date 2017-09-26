@@ -23,273 +23,278 @@ import android.support.v4.content.ContextCompat;
 import android.support.v4.internal.view.SupportMenuItem;
 import android.support.v4.view.MenuItemCompat;
 import android.view.ContextMenu;
+import android.view.KeyEvent;
 import android.view.MenuItem;
 import android.view.SubMenu;
 import android.view.View;
 
 
- class ActionMenuItem implements SupportMenuItem {
+class ActionMenuItem implements SupportMenuItem {
 
+    private static final int NO_ICON = 0;
+    private static final int CHECKABLE = 0x00000001;
+    private static final int CHECKED = 0x00000002;
+    private static final int EXCLUSIVE = 0x00000004;
+    private static final int HIDDEN = 0x00000008;
+    private static final int ENABLED = 0x00000010;
+    private final int mId;
+    private final int mGroup;
+    private final int mCategoryOrder;
+    private final int mOrdering;
+    private CharSequence mTitle;
+    private CharSequence mTitleCondensed;
+    private Intent mIntent;
+    private char mShortcutNumericChar;
+    private char mShortcutAlphabeticChar;
+    private Drawable mIconDrawable;
+    private int mIconResId = NO_ICON;
+    private int mAlphaModifiers = KeyEvent.META_CTRL_ON;
+    private Context mContext;
+    private SupportMenuItem.OnMenuItemClickListener mClickListener;
+    private int mFlags = ENABLED;
 
-     private final int mId;
-     private final int mGroup;
-     private final int mCategoryOrder;
-     private final int mOrdering;
+    public ActionMenuItem(Context context, int group, int id, int categoryOrder, int ordering,
+                          CharSequence title) {
+        mContext = context;
+        mId = id;
+        mGroup = group;
+        mCategoryOrder = categoryOrder;
+        mOrdering = ordering;
+        mTitle = title;
+    }
 
-     private CharSequence mTitle;
-     private CharSequence mTitleCondensed;
-     private Intent mIntent;
-     private char mShortcutNumericChar;
-     private char mShortcutAlphabeticChar;
+    public int getItemId() {
+        return mId;
+    }
 
-     private Drawable mIconDrawable;
-     private int mIconResId = NO_ICON;
+    public int getGroupId() {
+        return mGroup;
+    }
 
-     private Context mContext;
+    public int getOrder() {
+        return mOrdering;
+    }
 
-     private SupportMenuItem.OnMenuItemClickListener mClickListener;
+    public MenuItem setTitle(CharSequence title) {
+        mTitle = title;
+        return this;
+    }
 
-     private static final int NO_ICON = 0;
+    public MenuItem setTitle(int title) {
+        mTitle = mContext.getResources().getString(title);
+        return this;
+    }
 
-     private int mFlags = ENABLED;
-     private static final int CHECKABLE = 0x00000001;
-     private static final int CHECKED = 0x00000002;
-     private static final int EXCLUSIVE = 0x00000004;
-     private static final int HIDDEN = 0x00000008;
-     private static final int ENABLED = 0x00000010;
+    public CharSequence getTitle() {
+        return mTitle;
+    }
 
-     public ActionMenuItem(Context context, int group, int id, int categoryOrder, int ordering,
-                           CharSequence title) {
-         mContext = context;
-         mId = id;
-         mGroup = group;
-         mCategoryOrder = categoryOrder;
-         mOrdering = ordering;
-         mTitle = title;
-     }
+    public MenuItem setTitleCondensed(CharSequence title) {
+        mTitleCondensed = title;
+        return this;
+    }
 
-     public char getAlphabeticShortcut() {
-         return mShortcutAlphabeticChar;
-     }
+    public CharSequence getTitleCondensed() {
+        return mTitleCondensed != null ? mTitleCondensed : mTitle;
+    }
 
-     public int getGroupId() {
-         return mGroup;
-     }
+    public MenuItem setIcon(Drawable icon) {
+        mIconDrawable = icon;
+        mIconResId = NO_ICON;
+        return this;
+    }
 
-     public Drawable getIcon() {
-         return mIconDrawable;
-     }
+    public MenuItem setIcon(int iconRes) {
+        mIconResId = iconRes;
+        if (iconRes > 0)
+            mIconDrawable = ContextCompat.getDrawable(mContext, iconRes);
+        return this;
+    }
 
-     public Intent getIntent() {
-         return mIntent;
-     }
+    public Drawable getIcon() {
+        return mIconDrawable;
+    }
 
-     public int getItemId() {
-         return mId;
-     }
+    public MenuItem setIntent(Intent intent) {
+        mIntent = intent;
+        return this;
+    }
 
-     public ContextMenu.ContextMenuInfo getMenuInfo() {
-         return null;
-     }
+    public Intent getIntent() {
+        return mIntent;
+    }
 
-     public char getNumericShortcut() {
-         return mShortcutNumericChar;
-     }
+    public MenuItem setShortcut(char numericChar, char alphaChar) {
+        mShortcutNumericChar = numericChar;
+        mShortcutAlphabeticChar = alphaChar;
+        return this;
+    }
 
-     public int getOrder() {
-         return mOrdering;
-     }
+    public MenuItem setNumericShortcut(char numericChar) {
+        mShortcutNumericChar = numericChar;
+        return this;
+    }
 
-     public SubMenu getSubMenu() {
-         return null;
-     }
+    public char getNumericShortcut() {
+        return mShortcutNumericChar;
+    }
 
-     public CharSequence getTitle() {
-         return mTitle;
-     }
+    public MenuItem setAlphabeticShortcut(char alphaChar) {
+        mShortcutAlphabeticChar = alphaChar;
+        return this;
+    }
 
-     public CharSequence getTitleCondensed() {
-         return mTitleCondensed != null ? mTitleCondensed : mTitle;
-     }
+    @Override public MenuItem setAlphabeticShortcut(char alphaChar, int alphaModifiers) {
+        mShortcutAlphabeticChar = alphaChar;
+        mAlphaModifiers = alphaModifiers;
+        return this;
+    }
 
-     public boolean hasSubMenu() {
-         return false;
-     }
+    public char getAlphabeticShortcut() {
+        return mShortcutAlphabeticChar;
+    }
 
-     public boolean isCheckable() {
-         return (mFlags & CHECKABLE) != 0;
-     }
+    @Override public int getAlphabeticModifiers() {
+        return mAlphaModifiers;
+    }
 
-     public boolean isChecked() {
-         return (mFlags & CHECKED) != 0;
-     }
+    public MenuItem setCheckable(boolean checkable) {
+        mFlags = (mFlags & ~CHECKABLE) | (checkable ? CHECKABLE : 0);
+        return this;
+    }
 
-     public boolean isEnabled() {
-         return (mFlags & ENABLED) != 0;
-     }
+    public boolean isCheckable() {
+        return (mFlags & CHECKABLE) != 0;
+    }
 
-     public boolean isVisible() {
-         return (mFlags & HIDDEN) == 0;
-     }
+    public MenuItem setChecked(boolean checked) {
+        mFlags = (mFlags & ~CHECKED) | (checked ? CHECKED : 0);
+        return this;
+    }
 
-     public MenuItem setAlphabeticShortcut(char alphaChar) {
-         mShortcutAlphabeticChar = alphaChar;
-         return this;
-     }
+    public boolean isChecked() {
+        return (mFlags & CHECKED) != 0;
+    }
 
-     public MenuItem setCheckable(boolean checkable) {
-         mFlags = (mFlags & ~CHECKABLE) | (checkable ? CHECKABLE : 0);
-         return this;
-     }
+    public MenuItem setVisible(boolean visible) {
+        mFlags = (mFlags & ~HIDDEN) | (visible ? 0 : HIDDEN);
+        return this;
+    }
 
-     public ActionMenuItem setExclusiveCheckable(boolean exclusive) {
-         mFlags = (mFlags & ~EXCLUSIVE) | (exclusive ? EXCLUSIVE : 0);
-         return this;
-     }
+    public boolean isVisible() {
+        return (mFlags & HIDDEN) == 0;
+    }
 
-     public MenuItem setChecked(boolean checked) {
-         mFlags = (mFlags & ~CHECKED) | (checked ? CHECKED : 0);
-         return this;
-     }
+    public MenuItem setEnabled(boolean enabled) {
+        mFlags = (mFlags & ~ENABLED) | (enabled ? ENABLED : 0);
+        return this;
+    }
 
-     public MenuItem setEnabled(boolean enabled) {
-         mFlags = (mFlags & ~ENABLED) | (enabled ? ENABLED : 0);
-         return this;
-     }
+    public boolean isEnabled() {
+        return (mFlags & ENABLED) != 0;
+    }
 
-     public MenuItem setIcon(Drawable icon) {
-         mIconDrawable = icon;
-         mIconResId = NO_ICON;
-         return this;
-     }
+    public boolean hasSubMenu() {
+        return false;
+    }
 
-     public MenuItem setIcon(int iconRes) {
-         mIconResId = iconRes;
-         if (iconRes>0)
-         mIconDrawable = ContextCompat.getDrawable(mContext, iconRes);
-         return this;
-     }
+    public SubMenu getSubMenu() {
+        return null;
+    }
 
-     public MenuItem setIntent(Intent intent) {
-         mIntent = intent;
-         return this;
-     }
+    public MenuItem setOnMenuItemClickListener(OnMenuItemClickListener menuItemClickListener) {
+        mClickListener = menuItemClickListener;
+        return this;
+    }
 
-     public MenuItem setNumericShortcut(char numericChar) {
-         mShortcutNumericChar = numericChar;
-         return this;
-     }
+    public ContextMenu.ContextMenuInfo getMenuInfo() {
+        return null;
+    }
 
-     public MenuItem setOnMenuItemClickListener(OnMenuItemClickListener menuItemClickListener) {
-         mClickListener = menuItemClickListener;
-         return this;
-     }
+    @Override
+    public MenuItem setActionProvider(android.view.ActionProvider actionProvider) {
+        throw new UnsupportedOperationException();
+    }
 
-     public MenuItem setShortcut(char numericChar, char alphaChar) {
-         mShortcutNumericChar = numericChar;
-         mShortcutAlphabeticChar = alphaChar;
-         return this;
-     }
+    @Override
+    public android.view.ActionProvider getActionProvider() {
+        throw new UnsupportedOperationException();
+    }
 
-     public MenuItem setTitle(CharSequence title) {
-         mTitle = title;
-         return this;
-     }
+    @Override
+    public MenuItem setOnActionExpandListener(MenuItem.OnActionExpandListener listener) {
+        throw new UnsupportedOperationException();
+    }
 
-     public MenuItem setTitle(int title) {
-         mTitle = mContext.getResources().getString(title);
-         return this;
-     }
+    public void setShowAsAction(int show) {
+        // Do nothing. ActionMenuItems always show as action buttons.
+    }
 
-     public MenuItem setTitleCondensed(CharSequence title) {
-         mTitleCondensed = title;
-         return this;
-     }
+    @Override
+    public SupportMenuItem setShowAsActionFlags(int actionEnum) {
+        setShowAsAction(actionEnum);
+        return this;
+    }
 
-     public MenuItem setVisible(boolean visible) {
-         mFlags = (mFlags & ~HIDDEN) | (visible ? 0 : HIDDEN);
-         return this;
-     }
+    public SupportMenuItem setActionView(View actionView) {
+        throw new UnsupportedOperationException();
+    }
 
-     public boolean invoke() {
-         if (mClickListener != null && mClickListener.onMenuItemClick(this)) {
-             return true;
-         }
+    @Override
+    public SupportMenuItem setActionView(int resId) {
+        throw new UnsupportedOperationException();
+    }
 
-         if (mIntent != null) {
-             mContext.startActivity(mIntent);
-             return true;
-         }
+    public View getActionView() {
+        return null;
+    }
 
-         return false;
-     }
+    @Override
+    public SupportMenuItem setSupportActionProvider(android.support.v4.view.ActionProvider actionProvider) {
+        throw new UnsupportedOperationException();
+    }
 
-     public void setShowAsAction(int show) {
-         // Do nothing. ActionMenuItems always show as action buttons.
-     }
+    @Override
+    public android.support.v4.view.ActionProvider getSupportActionProvider() {
+        return null;
+    }
 
-     public SupportMenuItem setActionView(View actionView) {
-         throw new UnsupportedOperationException();
-     }
+    @Override
+    public boolean expandActionView() {
+        return false;
+    }
 
-     public View getActionView() {
-         return null;
-     }
+    @Override
+    public boolean collapseActionView() {
+        return false;
+    }
 
-     @Override
-     public MenuItem setActionProvider(android.view.ActionProvider actionProvider) {
-         throw new UnsupportedOperationException();
-     }
+    @Override
+    public boolean isActionViewExpanded() {
+        return false;
+    }
 
-     @Override
-     public android.view.ActionProvider getActionProvider() {
-         throw new UnsupportedOperationException();
-     }
+    @Override
+    public SupportMenuItem setSupportOnActionExpandListener(MenuItemCompat.OnActionExpandListener listener) {
+        // No need to save the listener; ActionMenuItem does not support collapsing items.
+        return this;
+    }
 
-     @Override
-     public SupportMenuItem setActionView(int resId) {
-         throw new UnsupportedOperationException();
-     }
+    public ActionMenuItem setExclusiveCheckable(boolean exclusive) {
+        mFlags = (mFlags & ~EXCLUSIVE) | (exclusive ? EXCLUSIVE : 0);
+        return this;
+    }
 
-     @Override
-     public android.support.v4.view.ActionProvider getSupportActionProvider() {
-         return null;
-     }
+    public boolean invoke() {
+        if (mClickListener != null && mClickListener.onMenuItemClick(this)) {
+            return true;
+        }
 
-     @Override
-     public SupportMenuItem setSupportActionProvider(android.support.v4.view.ActionProvider actionProvider) {
-         throw new UnsupportedOperationException();
-     }
+        if (mIntent != null) {
+            mContext.startActivity(mIntent);
+            return true;
+        }
 
-     @Override
-     public SupportMenuItem setShowAsActionFlags(int actionEnum) {
-         setShowAsAction(actionEnum);
-         return this;
-     }
-
-     @Override
-     public boolean expandActionView() {
-         return false;
-     }
-
-     @Override
-     public boolean collapseActionView() {
-         return false;
-     }
-
-     @Override
-     public boolean isActionViewExpanded() {
-         return false;
-     }
-
-     @Override
-     public MenuItem setOnActionExpandListener(MenuItem.OnActionExpandListener listener) {
-         throw new UnsupportedOperationException();
-     }
-
-     @Override
-     public SupportMenuItem setSupportOnActionExpandListener(MenuItemCompat.OnActionExpandListener listener) {
-         // No need to save the listener; ActionMenuItem does not support collapsing items.
-         return this;
-     }
- }
+        return false;
+    }
+}
