@@ -18,10 +18,11 @@ package com.cocosw.bottomsheet;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.ColorStateList;
+import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.internal.view.SupportMenuItem;
-import android.support.v4.view.MenuItemCompat;
 import android.view.ContextMenu;
 import android.view.KeyEvent;
 import android.view.MenuItem;
@@ -52,6 +53,10 @@ class ActionMenuItem implements SupportMenuItem {
     private Context mContext;
     private SupportMenuItem.OnMenuItemClickListener mClickListener;
     private int mFlags = ENABLED;
+    private CharSequence mTooltipText;
+    private CharSequence mContentDescription;
+    private ColorStateList mIconTintList;
+    private PorterDuff.Mode mIconTintMode;
 
     public ActionMenuItem(Context context, int group, int id, int categoryOrder, int ordering,
                           CharSequence title) {
@@ -144,18 +149,8 @@ class ActionMenuItem implements SupportMenuItem {
         return this;
     }
 
-    @Override public MenuItem setAlphabeticShortcut(char alphaChar, int alphaModifiers) {
-        mShortcutAlphabeticChar = alphaChar;
-        mAlphaModifiers = alphaModifiers;
-        return this;
-    }
-
     public char getAlphabeticShortcut() {
         return mShortcutAlphabeticChar;
-    }
-
-    @Override public int getAlphabeticModifiers() {
-        return mAlphaModifiers;
     }
 
     public MenuItem setCheckable(boolean checkable) {
@@ -274,10 +269,62 @@ class ActionMenuItem implements SupportMenuItem {
         return false;
     }
 
-    @Override
-    public SupportMenuItem setSupportOnActionExpandListener(MenuItemCompat.OnActionExpandListener listener) {
-        // No need to save the listener; ActionMenuItem does not support collapsing items.
+    @Override public SupportMenuItem setContentDescription(CharSequence charSequence) {
+        mContentDescription = charSequence;
         return this;
+    }
+
+    @Override public CharSequence getContentDescription() {
+        return mContentDescription;
+    }
+
+    @Override public SupportMenuItem setTooltipText(CharSequence tooltipText) {
+        mTooltipText = tooltipText;
+        return this;
+    }
+
+    @Override public CharSequence getTooltipText() {
+        return mTooltipText;
+    }
+
+    @Override public MenuItem setShortcut(char c, char c1, int i, int i1) {
+        return null;
+    }
+
+    @Override public MenuItem setNumericShortcut(char c, int i) {
+        return null;
+    }
+
+    @Override public int getNumericModifiers() {
+        return 0;
+    }
+
+    @Override public MenuItem setAlphabeticShortcut(char alphaChar, int alphaModifiers) {
+        mShortcutAlphabeticChar = alphaChar;
+        mAlphaModifiers = alphaModifiers;
+        return this;
+    }
+
+    @Override public int getAlphabeticModifiers() {
+        return mAlphaModifiers;
+    }
+
+    @Override public MenuItem setIconTintList(ColorStateList iconTintList) {
+        mIconTintList = iconTintList;
+        return this;
+    }
+
+    @Override public ColorStateList getIconTintList() {
+        return mIconTintList;
+    }
+
+    @Override public MenuItem setIconTintMode(PorterDuff.Mode mode) {
+        mIconTintMode = mode;
+        return this;
+    }
+
+    @Override public PorterDuff.Mode getIconTintMode() {
+        return mIconTintMode;
     }
 
     public ActionMenuItem setExclusiveCheckable(boolean exclusive) {
